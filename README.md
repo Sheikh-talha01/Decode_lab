@@ -54,6 +54,27 @@ docker build -t decode_lab:latest .
 docker run --rm -e OPENAI_API_KEY="$OPENAI_API_KEY" decode_lab:latest --product Shoe --name "Acme Runner" --tone witty --platform linkedin
 ```
 
+Run with Docker Compose
+-
+Use `docker-compose.yml` to build and run the FastAPI demo locally (exposes port 8000).
+
+1. Copy the example env file and add your API key:
+
+```powershell
+copy .env.example .env
+# then edit .env and set OPENAI_API_KEY
+```
+
+2. Start the service (build on first run):
+
+```bash
+docker compose up --build
+```
+
+3. The FastAPI demo will be reachable at http://localhost:8000/ and the OpenAPI docs at http://localhost:8000/docs
+
+If your environment cannot run Docker (daemon not running), follow the CLI Quickstart above to run locally.
+
 Development & Tests
 -
 Run the test suite:
