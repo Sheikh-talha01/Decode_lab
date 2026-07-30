@@ -30,7 +30,3 @@ Docker & CI
 - CI workflow for `project1` is in `.github/workflows/project1-ci.yml`.
 - Dockerfiles and `docker-compose.yml` exist in each project for containerized demos.
 
-If you want, I can:
-- Enable Docker image publishing in CI (requires DockerHub/GHCR secret),
-- Add a GitHub Release and changelog entry, or
-- Add auth and websockets to `project1`.
