@@ -35,3 +35,26 @@ def apply_platform_filters(platform: str, text: str) -> Tuple[str, bool, str]:
         reason = f"truncated to {max_len} chars"
 
     return processed, truncated, reason
+
+
+PROFANITY_LIST = {"foo", "bar", "badword"}
+
+
+def check_and_sanitize_profanity(text: str) -> Tuple[str, bool]:
+    """Detects simple profane tokens and replaces them with asterisks.
+
+    Returns (sanitized_text, unsafe_flag).
+    """
+    if not text:
+        return text, False
+
+    words = text.split()
+    unsafe = False
+    for i, w in enumerate(words):
+        wl = ''.join(ch.lower() for ch in w if ch.isalpha())
+        if wl in PROFANITY_LIST:
+            words[i] = '*' * len(w)
+            unsafe = True
+
+    return ' '.join(words), unsafe
+

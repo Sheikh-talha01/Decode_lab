@@ -58,11 +58,32 @@ def main():
         from .validation import apply_platform_filters
 
         processed, truncated, reason = apply_platform_filters(args.platform, out.generated)
+        # profanity sanitize
+        from .validation import check_and_sanitize_profanity
+
+        sanitized, unsafe = check_and_sanitize_profanity(processed)
+
         out.platform = args.platform
-        out.processed = processed
+        out.processed = sanitized
         out.truncated = truncated
 
+        # wrap into strict output model
+        from .models import TextOutput
+
+        text_out = TextOutput(
+            product=args.product,
+            name=args.name,
+            tone=args.tone,
+            platform=args.platform,
+            generated=out.generated,
+            processed=sanitized,
+            truncated=truncated,
+            filter_reason=reason,
+            unsafe=unsafe,
+        )
+
         print("--- Generated Output ---")
-        print(out.json(indent=2))
+        print(text_out.json(indent=2))
+        return
 
     asyncio.run(run())

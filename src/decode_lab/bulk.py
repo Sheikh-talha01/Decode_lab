@@ -50,6 +50,9 @@ async def run_bulk(csv_path: str, pipeline, template, out_path: str = "outputs.j
 
                 platform = (row.get("platform") or row.get("Platform") or "").lower()
                 processed, truncated, reason = apply_platform_filters(platform, data.get("generated", ""))
+                from .validation import check_and_sanitize_profanity
 
-                out_record = {**row, **data, "processed": processed, "truncated": truncated, "filter_reason": reason}
+                sanitized, unsafe = check_and_sanitize_profanity(processed)
+
+                out_record = {**row, **data, "processed": sanitized, "truncated": truncated, "filter_reason": reason, "unsafe": unsafe}
                 out_fh.write(json.dumps(out_record, ensure_ascii=False) + "\n")
