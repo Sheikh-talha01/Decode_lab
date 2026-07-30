@@ -1,0 +1,2 @@
+streamlit==1.26.0
+# Streamlit pulls numpy and many GUI deps; install only when using the UI

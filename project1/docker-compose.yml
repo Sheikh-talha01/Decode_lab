@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  project1:
+    build: .
+    image: project1:local
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    ports:
+      - "8001:8001"
+    restart: unless-stopped

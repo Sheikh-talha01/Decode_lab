@@ -1,0 +1,6 @@
+/.venv
+__pycache__/
+*.pyc
+project1_memory.db
+.env
+.pytest_cache/
