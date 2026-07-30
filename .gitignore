@@ -1,0 +1,10 @@
+# Root gitignore
+__pycache__/
+*.pyc
+.venv/
+project1_memory.db
+.pytest_cache/
+.env
+dist/
+build/
+*.egg-info/
