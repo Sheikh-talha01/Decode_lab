@@ -10,6 +10,7 @@ class OpenAIAdapter:
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
         if not self.api_key:
             raise RuntimeError("OPENAI_API_KEY not set")
+        self.model = "gpt-4o-mini"
 
     async def generate(self, prompt: str, temperature: float = 0.7) -> str:
         """Call OpenAI's completion endpoint (mock compatibility).
@@ -27,17 +28,23 @@ class OpenAIAdapter:
 
         async with httpx.AsyncClient(timeout=30.0) as client:
             r = await client.post(url, headers=headers, json=payload)
+            # raise for non-2xx
             r.raise_for_status()
             data = r.json()
 
         # try to extract text -- support chat/completions and legacy
-        try:
-            text = data["choices"][0]["message"]["content"]
-        except Exception:
-            try:
-                text = data["choices"][0]["text"]
-            except Exception:
+        # Prefer Chat-style message content
+        if isinstance(data, dict) and "choices" in data and len(data["choices"]) > 0:
+            choice = data["choices"][0]
+            # chat completion
+            if isinstance(choice, dict) and "message" in choice and isinstance(choice["message"], dict) and "content" in choice["message"]:
+                text = choice["message"]["content"]
+            # legacy completion
+            elif "text" in choice:
+                text = choice["text"]
+            else:
                 text = json.dumps(data)
+        else:
+            text = json.dumps(data)
 
-        # Return JSON with a simple envelope for OutputSchema parsing
         return json.dumps({"generated": text})
