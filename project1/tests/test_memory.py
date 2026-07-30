@@ -1,4 +1,4 @@
-from src.project1 import memory
+from project1 import memory
 
 
 def test_create_and_append(tmp_path):

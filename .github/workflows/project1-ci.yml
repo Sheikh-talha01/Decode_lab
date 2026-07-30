@@ -1,0 +1,57 @@
+name: Project1 CI
+
+on:
+  push:
+    branches: [ main, feature/project1 ]
+    paths:
+      - 'project1/**'
+  pull_request:
+    paths:
+      - 'project1/**'
+
+jobs:
+  test:
+    name: Run tests (project1)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('project1/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r project1/requirements.txt
+
+      - name: Run pytest
+        run: |
+          pytest -q project1/tests
+
+  build-docker:
+    name: Build Docker (optional)
+    runs-on: ubuntu-latest
+    needs: test
+    if: ${{ secrets.DOCKERHUB_USERNAME }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and push (DockerHub)
+        uses: docker/build-push-action@v5
+        with:
+          context: project1
+          push: false
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/decode_lab:project1-${{ github.sha }}

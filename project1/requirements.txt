@@ -2,4 +2,6 @@ fastapi==0.95.2
 uvicorn[standard]==0.22.0
 httpx==0.24.1
 pydantic==1.10.12
-streamlit==1.26.0
+
+# Optional UI dependencies (install only when you need the Streamlit UI)
+# pip install -r requirements-ui.txt
