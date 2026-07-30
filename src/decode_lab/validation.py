@@ -1,4 +1,6 @@
 from typing import Tuple
+import os
+import json
 
 # Platform character limits (sane defaults)
 PLATFORM_LIMITS = {
@@ -36,8 +38,39 @@ def apply_platform_filters(platform: str, text: str) -> Tuple[str, bool, str]:
 
     return processed, truncated, reason
 
+# Profanity configuration
+_PROFANITY_LIST = set()
 
-PROFANITY_LIST = {"foo", "bar", "badword"}
+
+def _default_config_path():
+    # default config path in repo `config/defaults.json` at repo root
+    base = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    return os.path.normpath(os.path.join(base, "config", "defaults.json"))
+
+
+def load_profanity_from_config(path: str = None):
+    """Load profanity list from a JSON config file. If path is None, read
+    environment variable `DECODELAB_CONFIG` or fallback to packaged defaults.
+    The config JSON is expected to have a top-level `profanity` array.
+    """
+    global _PROFANITY_LIST
+    cfg_path = path or os.getenv("DECODELAB_CONFIG") or _default_config_path()
+    try:
+        with open(cfg_path, "r", encoding="utf8") as fh:
+            data = json.load(fh)
+            profs = data.get("profanity", []) if isinstance(data, dict) else []
+            _PROFANITY_LIST = set(str(x).lower() for x in profs)
+    except Exception:
+        # fallback to some defaults if loading fails
+        _PROFANITY_LIST = {"foo", "bar", "badword"}
+
+
+# load once at import
+load_profanity_from_config()
+
+# Ensure fallback defaults present
+if not _PROFANITY_LIST:
+    _PROFANITY_LIST = {"foo", "bar", "badword"}
 
 
 def check_and_sanitize_profanity(text: str) -> Tuple[str, bool]:
@@ -48,13 +81,25 @@ def check_and_sanitize_profanity(text: str) -> Tuple[str, bool]:
     if not text:
         return text, False
 
+    # ensure profanity list is loaded; fallback to defaults when empty
+    if not _PROFANITY_LIST:
+        load_profanity_from_config()
+
     words = text.split()
     unsafe = False
     for i, w in enumerate(words):
         wl = ''.join(ch.lower() for ch in w if ch.isalpha())
-        if wl in PROFANITY_LIST:
+        if wl in _PROFANITY_LIST:
             words[i] = '*' * len(w)
             unsafe = True
 
     return ' '.join(words), unsafe
+
+
+def reload_profanity(path: str = None):
+    """Public helper to reload profanity config (used by tests or runtime).
+
+    If `path` is provided, it will be used as the config file path.
+    """
+    load_profanity_from_config(path)
 
