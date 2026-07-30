@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: decode_lab
+Version: 0.1.0
+Summary: Automated Copywriting & Tone Transformer
+Requires-Python: >=3.10
+Requires-Dist: httpx[http2]==0.24.1
+Requires-Dist: pydantic==1.10.12
+Requires-Dist: tenacity==8.2.2
+Requires-Dist: pytest==7.4.0
