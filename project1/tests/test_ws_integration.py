@@ -1,11 +1,15 @@
 import os
-import time
-import asyncio
-from fastapi.testclient import TestClient
-from project1.app import create_app
+import pytest
 
 
 def test_ws_echo_mock_generation():
+    try:
+        from fastapi.testclient import TestClient
+    except Exception:
+        pytest.skip("fastapi/TestClient import failed in this environment")
+
+    from project1.app import create_app
+
     # ensure no token required for test by clearing env
     if 'PROJECT1_API_TOKEN' in os.environ:
         del os.environ['PROJECT1_API_TOKEN']
